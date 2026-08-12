@@ -1,0 +1,20 @@
+{
+  "name": "Start Calculadora",
+  "short_name": "Start Calc",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d2340",
+  "theme_color": "#0d2340",
+  "icons": [
+    {
+      "src": "favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
