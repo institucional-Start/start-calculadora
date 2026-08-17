@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d2340">
+<title>Start Calculadora</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="favicon-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --navy-deep:#0d2340;
+    --navy:#12335c;
+    --navy-light:#1c4a80;
+    --blue:#2f7dfa;
+    --blue-bright:#4a9bff;
+    --ink:#eaf1ff;
+    --ink-dim:#a9c0e0;
+    --line:rgba(255,255,255,0.12);
+    --good:#3ddc97;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(74,155,255,0.18), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, #081527 100%);
+    color:var(--ink);
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    accent-color:var(--blue-bright);
+    caret-color:var(--blue-bright);
+  }
+
+  .wrap{width:100%; max-width:460px; padding-top:12px; padding-bottom:32px;}
+
+  .logo-wrap{display:flex; justify-content:center; margin-bottom:8px; margin-top:0;}
+  .logo-wrap img{height:200px; width:auto; filter:drop-shadow(0 10px 24px rgba(0,0,0,0.4));}
+
+  h1{
+    font-size:26px;
+    line-height:1.15;
+    margin:0 0 22px;
+    font-weight:800;
+    letter-spacing:-0.01em;
+    text-align:center;
+  }
+  h1 em{color:var(--blue-bright); font-style:normal;}
+
+  .card{
+    background:linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:22px;
+    box-shadow:0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-dim);
+    margin-bottom:8px;
+    letter-spacing:.01em;
+  }
+  .field label .opt{
+    font-weight:500;
+    text-transform:none;
+    letter-spacing:0;
+    opacity:0.6;
+    font-size:12px;
+  }
+  .field-hint{
+    display:block;
+    margin-top:6px;
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--ink-dim);
+    opacity:0.75;
+  }
+  .input-row{
+    display:flex;
+    align-items:center;
+    background:rgba(255,255,255,0.05);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .input-row:focus-within{
+    border-color:var(--blue-bright);
+    background:rgba(74,155,255,0.08);
+  }
+  .input-row input{
+    flex:1;
+    min-width:0;
+    background:transparent;
+    border:0;
+    outline:0;
+    color:var(--ink);
+    font-size:20px;
+    font-weight:700;
+    padding:14px 4px 14px 16px;
+    font-variant-numeric:tabular-nums;
+    -moz-appearance:textfield;
+    caret-color:var(--blue-bright);
+  }
+  .input-row input::-webkit-outer-spin-button,
+  .input-row input::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+  .input-row input:-webkit-autofill,
+  .input-row input:-webkit-autofill:hover,
+  .input-row input:-webkit-autofill:focus{
+    -webkit-text-fill-color:var(--ink) !important;
+    -webkit-box-shadow:0 0 0 1000px transparent inset !important;
+    transition:background-color 9999s ease-in-out 0s;
+    caret-color:var(--ink);
+  }
+  .input-row input::placeholder{color:rgba(255,255,255,0.28); font-weight:500;}
+  .unit{
+    padding:0 16px;
+    color:var(--ink-dim);
+    font-size:14px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .unit-left{padding-right:0; padding-left:16px;}
+  .input-row .unit-left ~ input{padding-left:6px;}
+  .unit-liters{
+    padding:0 16px 0 0;
+    margin-left:-8px;
+    color:var(--blue-bright);
+    font-size:13px;
+    font-weight:700;
+    white-space:nowrap;
+    opacity:0.85;
+  }
+
+  /* proportion field: 1 : X layout — centralizado e equilibrado */
+  .ratio-row{
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    height:52px;
+    background:rgba(255,255,255,0.05);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .ratio-row:focus-within{border-color:var(--blue-bright); background:rgba(74,155,255,0.08);}
+  .ratio-fixed,
+  .ratio-sep{
+    display:flex;
+    align-items:center;
+    font-size:19px;
+    font-weight:700;
+    color:var(--ink-dim);
+  }
+  .ratio-fixed{padding-left:16px;}
+  .ratio-sep{padding:0 8px;}
+  .ratio-row input{
+    display:flex;
+    align-items:center;
+    width:70px;
+    flex:none;
+    background:transparent;
+    border:0;
+    outline:0;
+    margin:0;
+    padding:0 16px 0 0;
+    color:var(--ink);
+    font-size:19px;
+    font-weight:700;
+    font-family:inherit;
+    line-height:normal;
+    text-align:left;
+    font-variant-numeric:tabular-nums;
+    -moz-appearance:textfield;
+    caret-color:var(--blue-bright);
+  }
+  .ratio-row input::-webkit-outer-spin-button,
+  .ratio-row input::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+  .ratio-row input:-webkit-autofill,
+  .ratio-row input:-webkit-autofill:hover,
+  .ratio-row input:-webkit-autofill:focus{
+    -webkit-text-fill-color:var(--ink) !important;
+    -webkit-box-shadow:0 0 0 1000px transparent inset !important;
+    transition:background-color 9999s ease-in-out 0s;
+    caret-color:var(--ink);
+  }
+
+  .quick{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:10px;}
+  .quick button{
+    background:rgba(255,255,255,0.06);
+    border:1px solid var(--line);
+    color:var(--ink-dim);
+    font-size:13px;
+    font-weight:700;
+    padding:9px 4px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .quick button:active, .quick button.active{
+    background:var(--blue);
+    border-color:var(--blue);
+    color:#fff;
+  }
+
+  .ratio-info{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    margin-top:12px;
+    padding:10px 12px;
+    border-radius:12px;
+    background:rgba(255,193,74,0.08);
+    border:1px solid rgba(255,193,74,0.25);
+  }
+  .ratio-info .icon{font-size:14px; line-height:1.4; flex:none;}
+  .ratio-info span{
+    font-size:12.5px;
+    line-height:1.45;
+    color:var(--ink-dim);
+  }
+  .ratio-info b{color:var(--ink); font-weight:800;}
+
+  .calc-btn{
+    width:100%;
+    margin-top:6px;
+    padding:16px;
+    border:0;
+    border-radius:14px;
+    background:linear-gradient(180deg, var(--blue-bright), var(--blue));
+    color:#fff;
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:.01em;
+    cursor:pointer;
+    box-shadow:0 12px 24px -8px rgba(47,125,250,0.55);
+    -webkit-user-select:none; user-select:none;
+  }
+  .calc-btn:active{transform:translateY(1px); box-shadow:0 8px 16px -8px rgba(47,125,250,0.5);}
+
+  .result{
+    margin-top:18px;
+    border-radius:16px;
+    background:rgba(61,220,151,0.1);
+    border:1px solid rgba(61,220,151,0.35);
+    padding:18px;
+    display:none;
+  }
+  .result.show{display:block;}
+  .result .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:8px 0;
+  }
+  .result .row + .row{border-top:1px dashed rgba(255,255,255,0.14);}
+  .result .label{font-size:14px; color:var(--ink-dim); font-weight:600;}
+  .result .value{font-size:20px; font-weight:800; color:var(--good); font-variant-numeric:tabular-nums;}
+  .result .total{font-size:12px; color:var(--ink-dim); margin-top:10px; text-align:center;}
+  .result .total-preco{
+    font-weight:800;
+    color:var(--ink);
+    font-size:13px;
+    margin-top:16px;
+  }
+
+  .err{
+    margin-top:14px;
+    border-radius:12px;
+    background:rgba(255,99,99,0.12);
+    border:1px solid rgba(255,99,99,0.35);
+    color:#ffb3b3;
+    padding:12px 14px;
+    font-size:14px;
+    font-weight:600;
+    display:none;
+  }
+  .err.show{display:block;}
+
+  .msg-card{
+    display:none;
+    margin-top:14px;
+    border-radius:16px;
+    background:rgba(74,155,255,0.06);
+    border:1px solid rgba(74,155,255,0.25);
+    overflow:hidden;
+  }
+  .msg-card.show{display:block;}
+  .msg-toggle{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 14px;
+    background:rgba(74,155,255,0.1);
+    border:0;
+    cursor:pointer;
+    -webkit-user-select:none; user-select:none;
+  }
+  .msg-title{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:var(--blue-bright);
+  }
+  .chevron{
+    color:var(--blue-bright);
+    transition:transform .2s ease;
+    flex:none;
+  }
+  .msg-toggle.open .chevron{transform:rotate(180deg);}
+  .msg-content{display:none;}
+  .msg-content.open{display:block;}
+  .msg-head{
+    display:flex;
+    justify-content:flex-end;
+    padding:10px 14px 0;
+  }
+  .copy-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--blue);
+    border:0;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    padding:7px 12px;
+    border-radius:9px;
+    cursor:pointer;
+    -webkit-user-select:none; user-select:none;
+  }
+  .copy-btn:active{transform:translateY(1px);}
+  .copy-btn.copied{background:var(--good); color:#0a2e1f;}
+  .msg-body{
+    margin:0;
+    padding:10px 14px 14px;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.65;
+    color:var(--ink);
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+
+  /* Card secundário: cálculo por área (m²) */
+  .card-secondary{
+    margin-top:16px;
+    padding:0;
+    overflow:hidden;
+  }
+  .section-toggle{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 20px;
+    background:transparent;
+    border:0;
+    cursor:pointer;
+    -webkit-user-select:none; user-select:none;
+  }
+  .section-toggle-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:15px;
+    font-weight:800;
+    color:var(--ink);
+  }
+  .section-toggle-title .emoji{font-size:18px;}
+  .section-toggle-sub{
+    display:block;
+    font-size:12px;
+    font-weight:500;
+    color:var(--ink-dim);
+    margin-top:2px;
+  }
+  .section-content{display:none; padding:0 20px 22px;}
+  .section-content.open{display:block;}
+  .area-help{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    margin:-4px 0 16px;
+    padding:10px 12px;
+    border-radius:12px;
+    background:rgba(74,155,255,0.07);
+    border:1px solid rgba(74,155,255,0.22);
+  }
+  .area-help .icon{font-size:14px; line-height:1.4; flex:none;}
+  .area-help span{font-size:12.5px; line-height:1.45; color:var(--ink-dim);}
+
+  footer{
+    margin-top:22px;
+    text-align:center;
+    font-size:12px;
+    color:rgba(255,255,255,0.3);
+  }
+
+  @media (max-width:360px){
+    h1{font-size:23px;}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo-wrap"><img src="logo.png" alt="Start"></div>
+    <h1>Start <em>Calculadora</em></h1>
+
+    <div class="card">
+      <div class="field">
+        <label for="volume">Volume do Recipiente (ml):</label>
+        <div class="input-row">
+          <input id="volume" type="number" inputmode="decimal" min="0" step="any" placeholder="Ex: 1000" value="1000" autocomplete="off">
+          <span class="unit">ml</span>
+          <span class="unit-liters" id="volumeLitros">1L</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="ratio">Proporção de Diluição (ex. 1:10):</label>
+        <div class="ratio-row">
+          <span class="ratio-fixed">1</span>
+          <span class="ratio-sep">:</span>
+          <input id="ratio" type="number" inputmode="decimal" min="0" step="any" placeholder="5" value="5" autocomplete="off">
+        </div>
+        <div class="quick" id="quickRatios">
+          <button type="button" data-v="3">1:3</button>
+          <button type="button" data-v="5">1:5</button>
+          <button type="button" data-v="10">1:10</button>
+          <button type="button" data-v="20">1:20</button>
+          <button type="button" data-v="40">1:40</button>
+          <button type="button" data-v="50">1:50</button>
+          <button type="button" data-v="60">1:60</button>
+          <button type="button" data-v="100">1:100</button>
+        </div>
+        <div class="ratio-info">
+          <span class="icon">💡</span>
+          <span id="ratioInfoText">Isso significa: <b>1 parte de produto para 4 partes de água</b> (total de 5 partes).</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="preco">Preço do Litro do Produto <span class="opt">(opcional)</span></label>
+        <div class="input-row">
+          <span class="unit unit-left">R$</span>
+          <input id="preco" type="number" inputmode="decimal" min="0" step="any" placeholder="Ex: 30,00" autocomplete="off">
+        </div>
+      </div>
+
+      <button class="calc-btn" id="calcBtn">Calcular</button>
+
+      <div class="err" id="err"></div>
+
+      <div class="result" id="result">
+        <div class="row"><span class="label">Produto</span><span class="value" id="rProduto">–</span></div>
+        <div class="row"><span class="label">Água</span><span class="value" id="rAgua">–</span></div>
+        <div class="row" id="rowPreco" style="display:none;"><span class="label">Preço do litro diluído</span><span class="value" id="rPreco">–</span></div>
+        <div class="total" id="rTexto"></div>
+        <div class="total total-preco" id="rTextoPrecoBold" style="display:none;"></div>
+        <div class="total" id="rTextoPrecoLote" style="display:none;"></div>
+      </div>
+
+      <div class="msg-card" id="msgCard">
+        <button type="button" class="msg-toggle" id="msgToggle" aria-expanded="false">
+          <span class="msg-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6.1H3"/><path d="M21 12.1H3"/><path d="M15.1 18H3"/></svg>
+            Mensagem para enviar
+          </span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="msg-content" id="msgContent">
+          <div class="msg-head">
+            <button type="button" class="copy-btn" id="copyBtn">
+              <svg class="icon-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <svg class="icon-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="copyBtnText">Copiar</span>
+            </button>
+          </div>
+          <pre class="msg-body" id="msgBody"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-secondary">
+      <button type="button" class="section-toggle" id="areaToggle" aria-expanded="false">
+        <span class="section-toggle-title">
+          <span class="emoji">📐</span>
+          <span>
+            Calcular por Área (m²)
+            <span class="section-toggle-sub">Quanto de produto usar para cobrir uma área</span>
+          </span>
+        </span>
+        <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="section-content" id="areaContent">
+        <div class="area-help">
+          <span class="icon">💡</span>
+          <span>Informe quanto de produto <b>já diluído</b> é gasto por m² e a área total. A calculadora usa a proporção definida acima para dizer quanto de produto concentrado e água você vai precisar.</span>
+        </div>
+
+        <div class="field">
+          <label for="areaRendimento">Rendimento (ml de produto diluído por m²):</label>
+          <div class="input-row">
+            <input id="areaRendimento" type="number" inputmode="decimal" min="0" step="any" placeholder="Ex: 20" autocomplete="off">
+            <span class="unit">ml/m²</span>
+          </div>
+          <span class="field-hint" id="areaRendimentoHint">Preenchido com o resultado calculado acima — pode apagar e digitar outro valor.</span>
+        </div>
+
+        <div class="field">
+          <label for="areaM2">Área a ser Coberta (m²):</label>
+          <div class="input-row">
+            <input id="areaM2" type="number" inputmode="decimal" min="0" step="any" placeholder="Ex: 500" autocomplete="off">
+            <span class="unit">m²</span>
+          </div>
+        </div>
+
+        <button class="calc-btn" id="areaCalcBtn">Calcular Área</button>
+
+        <div class="err" id="areaErr"></div>
+
+        <div class="result" id="areaResult">
+          <div class="row"><span class="label">Produto diluído necessário</span><span class="value" id="areaTotalDiluido">–</span></div>
+          <div class="row"><span class="label">Produto concentrado</span><span class="value" id="areaConcentrado">–</span></div>
+          <div class="row"><span class="label">Água necessária</span><span class="value" id="areaAgua">–</span></div>
+          <div class="total" id="areaTexto"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Ferramenta de apoio comercial</footer>
+  </div>
+
+<script>
+  const volumeEl = document.getElementById('volume');
+  const ratioEl = document.getElementById('ratio');
+  const precoEl = document.getElementById('preco');
+  const btn = document.getElementById('calcBtn');
+  const resultEl = document.getElementById('result');
+  const errEl = document.getElementById('err');
+  const rProduto = document.getElementById('rProduto');
+  const rAgua = document.getElementById('rAgua');
+  const rPreco = document.getElementById('rPreco');
+  const rowPreco = document.getElementById('rowPreco');
+  const rTexto = document.getElementById('rTexto');
+  const rTextoPrecoBold = document.getElementById('rTextoPrecoBold');
+  const rTextoPrecoLote = document.getElementById('rTextoPrecoLote');
+  const quickWrap = document.getElementById('quickRatios');
+  const volumeLitrosEl = document.getElementById('volumeLitros');
+  const ratioInfoText = document.getElementById('ratioInfoText');
+  const msgCard = document.getElementById('msgCard');
+  const msgToggle = document.getElementById('msgToggle');
+  const msgContent = document.getElementById('msgContent');
+  const msgBody = document.getElementById('msgBody');
+  const copyBtn = document.getElementById('copyBtn');
+  const copyBtnText = document.getElementById('copyBtnText');
+
+  // Card de área (m²)
+  const areaToggle = document.getElementById('areaToggle');
+  const areaContent = document.getElementById('areaContent');
+  const areaRendimentoEl = document.getElementById('areaRendimento');
+  const areaM2El = document.getElementById('areaM2');
+  const areaCalcBtn = document.getElementById('areaCalcBtn');
+  const areaErr = document.getElementById('areaErr');
+  const areaResult = document.getElementById('areaResult');
+  const areaTotalDiluido = document.getElementById('areaTotalDiluido');
+  const areaConcentrado = document.getElementById('areaConcentrado');
+  const areaAgua = document.getElementById('areaAgua');
+  const areaTexto = document.getElementById('areaTexto');
+  const areaRendimentoHint = document.getElementById('areaRendimentoHint');
+  let areaRendimentoAutoFilled = true;
+
+  areaRendimentoEl.addEventListener('input', ()=>{
+    areaRendimentoAutoFilled = false;
+    areaRendimentoHint.style.display = 'none';
+  });
+
+  function fmt(n){
+    // format ml nicely: no unnecessary decimals, pt-BR separators
+    const rounded = Math.round(n * 100) / 100;
+    return rounded.toLocaleString('pt-BR', {maximumFractionDigits:2}) + ' ml';
+  }
+
+  function fmtComLitros(n){
+    // ex: "10.000 ml (10L)" — ajuda a visualizar volumes grandes
+    if(n >= 1000){
+      const litros = (n/1000).toLocaleString('pt-BR', {maximumFractionDigits:2});
+      return `${fmt(n)} (${litros}L)`;
+    }
+    return fmt(n);
+  }
+
+  function fmtMoney(n){
+    return n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  }
+
+  function updateRatioInfo(){
+    const ratio = parseFloat(ratioEl.value);
+    if(isNaN(ratio) || ratio <= 0){
+      ratioInfoText.innerHTML = 'Informe uma proporção válida para ver a explicação.';
+      return;
+    }
+    const partesAgua = ratio - 1;
+    if(partesAgua <= 0){
+      ratioInfoText.innerHTML = `Isso significa: <b>1 parte de produto, sem diluição em água</b>.`;
+    } else {
+      ratioInfoText.innerHTML = `Isso significa: <b>1 parte de produto para ${partesAgua.toLocaleString('pt-BR')} partes de água</b> (total de ${ratio.toLocaleString('pt-BR')} partes).`;
+    }
+  }
+
+  function updateLitros(){
+    const volume = parseFloat(volumeEl.value);
+    if(isNaN(volume) || volume <= 0){
+      volumeLitrosEl.textContent = '';
+      return;
+    }
+    const litros = volume / 1000;
+    volumeLitrosEl.textContent = litros.toLocaleString('pt-BR', {maximumFractionDigits:2}) + 'L';
+  }
+
+  volumeEl.addEventListener('input', updateLitros);
+
+  function highlightQuick(){
+    const val = ratioEl.value;
+    [...quickWrap.children].forEach(b=>{
+      b.classList.toggle('active', b.dataset.v === val);
+    });
+  }
+
+  quickWrap.addEventListener('click', (e)=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    ratioEl.value = b.dataset.v;
+    highlightQuick();
+    updateRatioInfo();
+    calculate();
+  });
+
+  ratioEl.addEventListener('input', ()=>{ highlightQuick(); updateRatioInfo(); });
+
+  // Estado compartilhado entre a diluição principal e o cálculo por área,
+  // usado para montar a mensagem final combinada.
+  const state = {
+    volume:0, ratio:0, produto:0, agua:0,
+    temPreco:false, precoLitroDiluido:0, custoLote:0,
+    temArea:false, areaRendimento:0, areaM2:0,
+    areaTotalDiluido:0, areaConcentrado:0, areaAgua:0, areaRecipientes:null
+  };
+
+  function buildMessage(){
+    let msg = `*Start Calculadora — Diluição*\n\n`;
+    msg += `Recipiente: ${fmt(state.volume)}\n`;
+    msg += `Proporção: 1:${state.ratio}\n\n`;
+    msg += `🧪 Produto: *${fmt(state.produto)}*\n`;
+    msg += `💧 Água: *${fmt(state.agua)}*\n`;
+
+    if(state.temPreco){
+      msg += `\n💰 Preço do litro diluído: *${fmtMoney(state.precoLitroDiluido)}*\n`;
+      msg += `💵 Valor de ${fmt(state.produto)} de produto: *${fmtMoney(state.custoLote)}*\n`;
+    }
+
+    if(state.temArea){
+      msg += `\n📐 *Cálculo por Área*\n`;
+      msg += `Área: ${state.areaM2.toLocaleString('pt-BR')} m² (rendimento de ${state.areaRendimento.toLocaleString('pt-BR')} ml/m²)\n`;
+      msg += `Produto diluído necessário: *${fmtComLitros(state.areaTotalDiluido)}*\n`;
+      msg += `→ Produto concentrado: *${fmtComLitros(state.areaConcentrado)}*\n`;
+      msg += `→ Água: *${fmtComLitros(state.areaAgua)}*\n`;
+      if(state.areaRecipientes){
+        msg += `Aprox. ${state.areaRecipientes} recipiente${state.areaRecipientes > 1 ? 's' : ''} de ${fmt(state.volume)}\n`;
+      }
+    }
+
+    return msg;
+  }
+
+  function refreshMessage(){
+    msgBody.textContent = buildMessage();
+    msgCard.classList.add('show');
+    resetCopyBtn();
+  }
+
+  function calculate(){
+    errEl.classList.remove('show');
+    const volume = parseFloat(volumeEl.value);
+    const ratio = parseFloat(ratioEl.value);
+
+    if(isNaN(volume) || volume <= 0){
+      errEl.textContent = 'Informe um volume de recipiente válido.';
+      errEl.classList.add('show');
+      resultEl.classList.remove('show');
+      msgCard.classList.remove('show');
+      return;
+    }
+    if(isNaN(ratio) || ratio < 0){
+      errEl.textContent = 'Informe uma proporção de diluição válida.';
+      errEl.classList.add('show');
+      resultEl.classList.remove('show');
+      msgCard.classList.remove('show');
+      return;
+    }
+
+    if(ratio === 0){
+      errEl.textContent = 'A proporção não pode ser zero.';
+      errEl.classList.add('show');
+      resultEl.classList.remove('show');
+      msgCard.classList.remove('show');
+      return;
+    }
+
+    // Mesma lógica da calculadora original Vonixx:
+    // "1:N" => produto = volume / N  (não volume / (1+N))
+    const produto = volume / ratio;
+    const agua = volume - produto;
+
+    rProduto.textContent = fmt(produto);
+    rAgua.textContent = fmt(agua);
+    rTexto.textContent = `Para um recipiente de ${fmt(volume)}, adicione ${fmt(produto)} de produto e ${fmt(agua)} de água.`;
+
+    state.volume = volume;
+    state.ratio = ratio;
+    state.produto = produto;
+    state.agua = agua;
+
+    // Preço do litro diluído (opcional): depende SOMENTE do preço do litro
+    // do produto concentrado e da proporção — nunca do volume do recipiente.
+    // Ex: R$30/L concentrado, diluição 1:5 → 30 / 5 = R$6,00 por litro diluído.
+    const precoLitro = parseFloat(precoEl.value);
+
+    if(!isNaN(precoLitro) && precoLitro > 0){
+      state.temPreco = true;
+      state.precoLitroDiluido = precoLitro / ratio;
+      // Custo do produto realmente usado neste recipiente (200ml no exemplo)
+      state.custoLote = precoLitro * (produto / 1000);
+
+      rPreco.textContent = fmtMoney(state.precoLitroDiluido) + '/L';
+      rowPreco.style.display = 'flex';
+
+      rTextoPrecoBold.textContent = `O preço do litro diluído do produto é de: ${fmtMoney(state.precoLitroDiluido)}`;
+      rTextoPrecoBold.style.display = 'block';
+
+      rTextoPrecoLote.textContent = `O valor de ${fmt(produto)} do produto será ${fmtMoney(state.custoLote)}.`;
+      rTextoPrecoLote.style.display = 'block';
+    } else {
+      state.temPreco = false;
+      rowPreco.style.display = 'none';
+      rTextoPrecoBold.style.display = 'none';
+      rTextoPrecoLote.style.display = 'none';
+    }
+
+    // Pré-preenche o rendimento por m² com o total já calculado acima,
+    // caso o gerente ainda não tenha digitado um valor próprio ali.
+    if(areaRendimentoAutoFilled){
+      areaRendimentoEl.value = volume;
+    }
+
+    // Se a área já estava preenchida, recalcula tudo com os novos números
+    // (proporção/volume podem ter mudado). Senão, apenas garante que o
+    // bloco de área fique escondido até o gerente preencher.
+    const areaM2Valor = parseFloat(areaM2El.value);
+    const areaRendValor = parseFloat(areaRendimentoEl.value);
+    if(!isNaN(areaM2Valor) && areaM2Valor > 0 && !isNaN(areaRendValor) && areaRendValor > 0){
+      calculateArea();
+    } else {
+      state.temArea = false;
+      areaResult.classList.remove('show');
+      areaErr.classList.remove('show');
+      refreshMessage();
+    }
+
+    resultEl.classList.add('show');
+  }
+
+  function resetCopyBtn(){
+    copyBtn.classList.remove('copied');
+    copyBtn.querySelector('.icon-copy').style.display = 'block';
+    copyBtn.querySelector('.icon-check').style.display = 'none';
+    copyBtnText.textContent = 'Copiar';
+  }
+
+  async function copyMessage(){
+    const text = msgBody.textContent;
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+      } else {
+        // fallback para navegadores/webviews sem suporte à Clipboard API
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      copyBtn.classList.add('copied');
+      copyBtn.querySelector('.icon-copy').style.display = 'none';
+      copyBtn.querySelector('.icon-check').style.display = 'block';
+      copyBtnText.textContent = 'Copiado!';
+      setTimeout(resetCopyBtn, 2200);
+    } catch(err){
+      copyBtnText.textContent = 'Toque e segure pra copiar';
+    }
+  }
+
+  copyBtn.addEventListener('click', copyMessage);
+
+  msgToggle.addEventListener('click', ()=>{
+    const isOpen = msgContent.classList.toggle('open');
+    msgToggle.classList.toggle('open', isOpen);
+    msgToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  areaToggle.addEventListener('click', ()=>{
+    const isOpen = areaContent.classList.toggle('open');
+    areaToggle.classList.toggle('open', isOpen);
+    areaToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  function calculateArea(){
+    areaErr.classList.remove('show');
+    areaResult.classList.remove('show');
+
+    const ratio = parseFloat(ratioEl.value);
+    const rendimento = parseFloat(areaRendimentoEl.value);
+    const area = parseFloat(areaM2El.value);
+
+    if(isNaN(ratio) || ratio <= 0){
+      areaErr.textContent = 'Preencha uma proporção de diluição válida no campo acima primeiro.';
+      areaErr.classList.add('show');
+      state.temArea = false;
+      refreshMessage();
+      return;
+    }
+    if(isNaN(rendimento) || rendimento <= 0){
+      areaErr.textContent = 'Informe o rendimento (ml por m²) do produto diluído.';
+      areaErr.classList.add('show');
+      state.temArea = false;
+      refreshMessage();
+      return;
+    }
+    if(isNaN(area) || area <= 0){
+      areaErr.textContent = 'Informe a área a ser coberta em m².';
+      areaErr.classList.add('show');
+      state.temArea = false;
+      refreshMessage();
+      return;
+    }
+
+    // Total de produto JÁ DILUÍDO necessário para cobrir a área inteira
+    const totalDiluido = rendimento * area;
+    // A partir da proporção (1:N) já usada na calculadora acima,
+    // separa quanto disso é produto concentrado e quanto é água
+    const concentrado = totalDiluido / ratio;
+    const agua = totalDiluido - concentrado;
+
+    areaTotalDiluido.textContent = fmtComLitros(totalDiluido);
+    areaConcentrado.textContent = fmtComLitros(concentrado);
+    areaAgua.textContent = fmtComLitros(agua);
+
+    let texto = `Para cobrir ${area.toLocaleString('pt-BR')} m² (com rendimento de ${rendimento.toLocaleString('pt-BR')} ml/m²), você vai precisar de ${fmtComLitros(totalDiluido)} de produto já diluído — sendo ${fmtComLitros(concentrado)} de produto concentrado e ${fmtComLitros(agua)} de água.`;
+
+    // Se o volume do recipiente principal estiver preenchido, calcula quantos
+    // recipientes daquele tamanho serão necessários — informação bem prática.
+    const volumeRecipiente = parseFloat(volumeEl.value);
+    let numRecipientes = null;
+    if(!isNaN(volumeRecipiente) && volumeRecipiente > 0){
+      numRecipientes = Math.ceil(totalDiluido / volumeRecipiente);
+      texto += ` Isso equivale a aproximadamente ${numRecipientes} recipiente${numRecipientes > 1 ? 's' : ''} de ${fmt(volumeRecipiente)}.`;
+    }
+
+    areaTexto.textContent = texto;
+    areaResult.classList.add('show');
+
+    // Atualiza o estado compartilhado e reconstrói a mensagem final,
+    // agora incluindo também os dados do cálculo por área.
+    state.temArea = true;
+    state.areaRendimento = rendimento;
+    state.areaM2 = area;
+    state.areaTotalDiluido = totalDiluido;
+    state.areaConcentrado = concentrado;
+    state.areaAgua = agua;
+    state.areaRecipientes = numRecipientes;
+
+    refreshMessage();
+  }
+
+  areaCalcBtn.addEventListener('click', calculateArea);
+  [areaRendimentoEl, areaM2El].forEach(el=>{
+    el.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ el.blur(); calculateArea(); } });
+    // Cálculo automático conforme o gerente digita, pra sair o resultado
+    // já pronto sem precisar clicar no botão toda vez.
+    el.addEventListener('input', ()=>{
+      const rendimento = parseFloat(areaRendimentoEl.value);
+      const area = parseFloat(areaM2El.value);
+      if(!isNaN(rendimento) && rendimento > 0 && !isNaN(area) && area > 0){
+        calculateArea();
+      }
+    });
+  });
+
+  btn.addEventListener('click', calculate);
+  [volumeEl, ratioEl, precoEl].forEach(el=>{
+    el.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ el.blur(); calculate(); } });
+  });
+
+  // calculate on load with default values
+  highlightQuick();
+  updateLitros();
+  updateRatioInfo();
+  calculate();
+
+  // basic offline support via service worker (optional, safe no-op if unsupported)
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+</script>
+</body>
+</html>
